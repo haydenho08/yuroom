@@ -33,9 +33,17 @@ York students use. Sibling projects: LockIn (Python/FastAPI/React), Statblox (Ty
 - Explain tradeoffs as they arise: compute-on-request vs precompute, data freshness,
   why user location stays in the browser.
 
+## Local dev
+- JDK: Temurin 21 at `C:\Program Files\Eclipse Adoptium\jdk-21.0.13.9-hotspot` (set JAVA_HOME if
+  `java` isn't on PATH yet). Gradle wrapper pinned to 8.14.3; Spring Boot 3.5.x.
+- Postgres runs on **localhost:5433** (5432 is used by Hayden's studyflow-db; don't touch it).
+- `docker compose up -d --wait`, then in `backend/`: `gradlew test`, `gradlew bootRun`.
+- Tests run with `user.timezone=Pacific/Auckland` on purpose; never "fix" a test by changing that.
+- Killing a `gradlew bootRun` task can leave the java.exe holding port 8080; stop it by port.
+
 ## Stages
 0. **Check the data first** — DONE (see `docs/stage-0.md`). Outcome: do NOT scrape.
-1. Data model + ingestion: Term, Building, Room, Meeting entities; scheduled ingestion job
+1. **Data model + ingestion** — DONE (see `docs/stage-1.md`). Term, Building, Room, Meeting entities; scheduled ingestion job
    (rate-limited, cached, respects robots.txt, at most daily, generic UA "YURoom student project",
    never Hayden's email). Store raw + parsed data. Parser tested against saved sample files,
    never the live site. Flyway, docker-compose, .env.example, .gitignore.
