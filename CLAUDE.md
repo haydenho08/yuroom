@@ -1,0 +1,66 @@
+# YURoom — project memory
+
+YURoom shows York University students which classrooms have no class scheduled right now
+and how long they stay free. Built by Hayden Ho (1st-year SWE, York) as a resume project
+for Summer 2027 SWE internships. Goal: show Java + Spring Boot and ship a real product
+York students use. Sibling projects: LockIn (Python/FastAPI/React), Statblox (TypeScript/Redis).
+
+## How we work
+- Build in stages. After each stage, STOP and walk Hayden through what was built and why,
+  professor-style: concepts, tradeoffs, and the interview questions they answer.
+  Do not start the next stage until Hayden says so.
+- Write a short teaching walkthrough per stage in `docs/stage-N.md`.
+- Actually run things: Docker, Gradle build + tests until green, start the app end to end.
+- Environment: Windows, PowerShell, VS Code, Docker Desktop.
+
+## Git rules
+- Commit as `Hayden Ho <hydnho@gmail.com>` (set via repo-local `git config`).
+- NEVER add Co-Authored-By or any Claude/AI attribution lines to commit messages or PRs.
+- Small, meaningful commits.
+- GitHub username: haydenho08. ASK before creating or pushing to any remote repo.
+
+## Tech stack
+- Backend: Java 21, Spring Boot 3, Spring Data JPA, Flyway, Jsoup (if HTML parsing), Gradle
+- DB: PostgreSQL 16 via docker-compose
+- Frontend: React + TypeScript (Vite), mobile-first
+- Tests: JUnit 5, Testcontainers (Postgres), Vitest
+
+## Engineering standards
+- Layered backend: controller → service → repository. DTOs separate from entities.
+  Validate inputs. Consistent error responses.
+- Free-time logic is a pure, Spring-free, heavily tested service.
+- All time logic uses java.time in America/Toronto (DST-safe).
+- Explain tradeoffs as they arise: compute-on-request vs precompute, data freshness,
+  why user location stays in the browser.
+
+## Stages
+0. **Check the data first** — DONE (see `docs/stage-0.md`). Outcome: do NOT scrape.
+1. Data model + ingestion: Term, Building, Room, Meeting entities; scheduled ingestion job
+   (rate-limited, cached, respects robots.txt, at most daily, generic UA "YURoom student project",
+   never Hayden's email). Store raw + parsed data. Parser tested against saved sample files,
+   never the live site. Flyway, docker-compose, .env.example, .gitignore.
+2. "Is it free?" engine + REST API: `GET /api/buildings`,
+   `GET /api/rooms/free?building=&at=&minMinutes=` (free until + minutes remaining),
+   `GET /api/rooms/{id}/schedule?date=`. Edge cases: outside term, reading week, holidays,
+   exam period (timetable doesn't apply — say so), early/late hours. Justify indexes.
+3. Frontend (mobile-first): building picker or all; free rooms sorted by free duration
+   ("Free until 2:30 · 1h 45m"); room detail with day schedule. Footer:
+   "Student-built, not affiliated with York University." No York logo/official branding.
+4. Near me + crowd reports: hand-curated building coordinates, distance sort in the browser
+   (location never sent to/stored on server). Anonymous "actually occupied" reports,
+   expire ~60 min, rate-limited, shown as a warning.
+5. Polish + launch: GitHub Actions CI (build, tests, lint); cheap/free hosting for
+   Spring Boot + Postgres; privacy-friendly analytics (no personal data, honest WAU);
+   resume README (Mermaid architecture diagram, screenshots, setup, disclaimer);
+   launch plan (r/yorku, course Discords, CSHub, GDG York).
+
+## Data-source decisions (from Stage 0)
+- York Courses site (w2prod.sis.yorku.ca) is behind a Cloudflare bot challenge — even
+  robots.txt returns 403 to non-browser clients. Do not attempt to bypass it.
+- yorku.ca terms: personal non-commercial use only; no reproduction/redistribution without
+  York's prior written consent; York name/marks are trademarks.
+- Visual Schedule Builder requires Passport York login — never automate it.
+- Plan: ask the Registrar for permission / an export. Meanwhile ingestion goes through a
+  `TimetableSource` interface with an admin CSV-import implementation. Parser fixtures are
+  synthetic (real saved York pages, if any, stay out of git).
+- Public API exposes "booked HH:MM–HH:MM" only, not course codes (safety/privacy).
