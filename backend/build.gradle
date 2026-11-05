@@ -1,0 +1,55 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.16'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'dev.yuroom'
+version = '0.1.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-database-postgresql'
+    implementation 'org.apache.commons:commons-csv:1.14.1'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += ['-Xlint:all', '-Xlint:-processing', '-Xlint:-serial']
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    // Run tests in a zone far from Toronto (and with opposite DST) so any code that silently
+    // depends on the machine's default time zone fails here instead of in production.
+    systemProperty 'user.timezone', 'Pacific/Auckland'
+    testLogging {
+        events 'failed', 'skipped'
+        exceptionFormat 'full'
+    }
+}
+
+// Run the app from the backend/ folder so the default sample-data path (../data/...) resolves.
+tasks.named('bootRun') {
+    workingDir = projectDir
+}

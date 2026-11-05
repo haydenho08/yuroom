@@ -1,0 +1,31 @@
+# Secrets / local config
+.env
+*.local.yml
+
+# Real timetable data must never be committed (York terms: no redistribution).
+# Only synthetic samples under data/sample/ are tracked.
+data/*
+!data/sample/
+data/private/
+
+# Gradle / Java
+.gradle/
+build/
+out/
+!gradle/wrapper/gradle-wrapper.jar
+*.class
+*.log
+hs_err_pid*
+
+# IDEs
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+
+# Node (frontend, later stages)
+node_modules/
+dist/
+coverage/

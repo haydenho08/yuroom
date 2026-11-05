@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: yuroom
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5433/yuroom?reWriteBatchedInserts=true}
+    username: ${DATABASE_USERNAME:yuroom}
+    password: ${DATABASE_PASSWORD:yuroom}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate   # Flyway owns the schema; Hibernate only checks it matches.
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 500
+        order_inserts: true
+        # Bind LocalDate/LocalTime/Instant straight to JDBC (setObject) with no zone conversion.
+        # A class at "08:30" must be stored as 08:30 whatever zone the server runs in.
+        # (Setting hibernate.jdbc.time_zone=UTC here once shifted every class by 4-5 hours.)
+        type:
+          java_time_use_direct_jdbc: true
+  flyway:
+    enabled: true
+
+yuroom:
+  ingestion:
+    enabled: ${INGESTION_ENABLED:true}
+    source: ${INGESTION_SOURCE:FILE}
+    cron: "0 15 4 * * *"          # 04:15 America/Toronto, once a day
+    min-interval: 20h             # hard floor between successful runs, survives restarts
+    run-on-startup: ${INGESTION_RUN_ON_STARTUP:true}
+    max-reject-ratio: 0.2
+    charset: UTF-8
+    file:
+      path: ${INGESTION_FILE_PATH:../data/sample/timetable-sample.csv}
+    http:
+      url: ${INGESTION_HTTP_URL:}
+      user-agent: "YURoom student project"
+      min-request-interval: 10s
+      timeout: 30s
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
