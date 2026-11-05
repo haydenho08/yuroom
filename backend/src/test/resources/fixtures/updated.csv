@@ -1,0 +1,4 @@
+# Synthetic fixture: "next night's" export for valid.csv's term, with one class removed and a new room.
+term_code,campus,building,room,day,start_time,end_time,duration_minutes,start_date,end_date,course_code,section,meeting_type
+2026FA,Keele,LAS,A,MW,8:30,,90,2026-09-09,2026-12-08,DEMO 1001,A,LECT
+2026FA,Keele,LAS,C,TR,10:00,11:30,,2026-09-09,2026-12-08,DEMO 1002,A,LECT
