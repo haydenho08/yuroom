@@ -1,0 +1,95 @@
+/** Types mirror the backend DTOs in dev.yuroom.api.ApiDtos. */
+
+export type Status = 'OK' | 'NO_CLASSES' | 'OUTSIDE_HOURS' | 'CLOSED' | 'EXAMS' | 'OUTSIDE_TERM'
+
+export interface Building {
+  code: string
+  name: string | null
+  campus: string | null
+  roomCount: number
+}
+
+export interface Hours {
+  open: string
+  close: string
+}
+
+export interface FreeRoom {
+  roomId: number
+  building: string
+  room: string
+  freeUntil: string
+  freeUntilReason: 'NEXT_BOOKING' | 'CLOSING'
+  minutesFree: number
+}
+
+export interface FreeRoomsResponse {
+  at: string
+  date: string
+  status: Status
+  notice: string | null
+  term: string | null
+  timetableDay: string | null
+  hours: Hours
+  dataUpdatedAt: string | null
+  rooms: FreeRoom[]
+}
+
+export interface Range {
+  start: string
+  end: string
+}
+
+export interface RoomScheduleResponse {
+  roomId: number
+  building: string
+  room: string
+  date: string
+  status: Status
+  notice: string | null
+  term: string | null
+  timetableDay: string | null
+  hours: Hours
+  booked: Range[]
+  free: Range[]
+  dataUpdatedAt: string | null
+}
+
+/** An HTTP error, carrying the RFC 9457 problem "detail" when the server sent one. */
+export class ApiError extends Error {
+  readonly status: number
+
+  constructor(status: number, message: string) {
+    super(message)
+    this.name = 'ApiError'
+    this.status = status
+  }
+}
+
+export async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
+  const res = await fetch(path, { signal, headers: { Accept: 'application/json' } })
+  if (!res.ok) {
+    let detail = `Request failed (${res.status})`
+    try {
+      const problem = (await res.json()) as { detail?: string }
+      if (problem.detail) detail = problem.detail
+    } catch {
+      // not JSON (e.g. proxy error page): keep the generic message
+    }
+    throw new ApiError(res.status, detail)
+  }
+  return (await res.json()) as T
+}
+
+export function freeRoomsPath(params: { building?: string; at?: string; minMinutes?: number }): string {
+  const q = new URLSearchParams()
+  if (params.building) q.set('building', params.building)
+  if (params.at) q.set('at', params.at)
+  if (params.minMinutes) q.set('minMinutes', String(params.minMinutes))
+  const qs = q.toString()
+  return `/api/rooms/free${qs ? `?${qs}` : ''}`
+}
+
+export function schedulePath(roomId: string | number, date?: string): string {
+  return `/api/rooms/${encodeURIComponent(String(roomId))}/schedule${date ? `?date=${date}` : ''}`
+}
