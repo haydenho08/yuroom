@@ -1,0 +1,34 @@
+# Hand-curated York teaching buildings: code -> name, campus, coordinates (building centroid).
+# Coordinates and names: (c) OpenStreetMap contributors, ODbL 1.0 (openstreetmap.org/copyright),
+# fetched via Overpass on 2026-11-07. Codes are the acronyms used on timetables; double-check any
+# new code against a real timetable before adding it. Lines starting with # are comments.
+code,name,campus,latitude,longitude
+ACE,Accolade East,Keele,43.772863,-79.499861
+ACW,Accolade West,Keele,43.772506,-79.502483
+ATK,Atkinson,Keele,43.771157,-79.502254
+BC,Norman Bethune College,Keele,43.773125,-79.509011
+BRG,Bergeron Centre for Engineering Excellence,Keele,43.772202,-79.506604
+BSB,Behavioural Sciences Building,Keele,43.773575,-79.503761
+CB,Chemistry Building,Keele,43.773435,-79.507762
+CC,Calumet College,Keele,43.772826,-79.509629
+CFA,Goldfarb Centre for Fine Arts,Keele,43.772056,-79.502128
+CFT,Centre for Film and Theatre,Keele,43.772729,-79.501180
+CLH,Curtis Lecture Halls,Keele,43.773169,-79.505179
+DB,Victor Phillip Dahdaleh Building,Keele,43.771267,-79.500611
+FC,Founders College,Keele,43.775886,-79.503334
+FRQ,Farquharson Life Sciences,Keele,43.774133,-79.504365
+HNE,"Health, Nursing and Environmental Studies",Keele,43.771332,-79.504741
+IKB,Ignat Kaneff Building (Osgoode Hall Law School),Keele,43.770758,-79.504547
+LAS,Lassonde Building,Keele,43.773932,-79.505250
+LSB,Life Sciences Building,Keele,43.774134,-79.507897
+LUM,Lumbers Building,Keele,43.774698,-79.504936
+MC,McLaughlin College,Keele,43.776746,-79.502535
+PSE,Petrie Science and Engineering,Keele,43.773641,-79.506945
+R,Ross Building,Keele,43.772713,-79.504164
+SC,Stong College,Keele,43.772647,-79.508564
+SLH,Stedman Lecture Halls,Keele,43.774391,-79.503164
+SSB,Seymour Schulich Building,Keele,43.773389,-79.498498
+VC,Vanier College,Keele,43.775529,-79.502222
+VH,Vari Hall,Keele,43.772689,-79.503413
+WC,Winters College,Keele,43.776205,-79.502277
+YH,York Hall,Glendon,43.727099,-79.378702
