@@ -1,5 +1,7 @@
 import { Link, useParams, useSearchParams } from 'react-router'
 import { schedulePath, type Range, type RoomScheduleResponse } from '../api'
+import { ReportButton } from '../components/ReportButton'
+import { ReportWarning } from '../components/ReportWarning'
 import { StatusNotice } from '../components/StatusNotice'
 import { addDays, campusNow, formatDate, formatDuration, formatRange } from '../format'
 import { useApi } from '../useApi'
@@ -32,7 +34,7 @@ export function RoomPage() {
   const { id = '' } = useParams()
   const [params] = useSearchParams()
   const date = params.get('date') ?? undefined
-  const { data, error } = useApi<RoomScheduleResponse>(schedulePath(id, date))
+  const { data, error, reload } = useApi<RoomScheduleResponse>(schedulePath(id, date))
 
   if (error && !data) {
     return (
@@ -62,6 +64,11 @@ export function RoomPage() {
       </nav>
 
       <StatusNotice status={data.status} notice={data.notice} />
+      {data.occupiedReports && (
+        <p className="notice notice--warn" role="status">
+          <ReportWarning reports={data.occupiedReports} />. The timetable says it's free, but someone may be using it.
+        </p>
+      )}
 
       {timeline.length > 0 && (
         <ol className="timeline">
@@ -83,6 +90,11 @@ export function RoomPage() {
             )
           })}
         </ol>
+      )}
+
+      {/* Reports describe "right now", so only offer one when looking at today. */}
+      {isToday && (data.status === 'OK' || data.status === 'NO_CLASSES') && (
+        <ReportButton roomId={data.roomId} onReported={reload} />
       )}
     </article>
   )
