@@ -47,7 +47,8 @@ York students use. Sibling projects: LockIn (Python/FastAPI/React), Statblox (Ty
    (rate-limited, cached, respects robots.txt, at most daily, generic UA "YURoom student project",
    never Hayden's email). Store raw + parsed data. Parser tested against saved sample files,
    never the live site. Flyway, docker-compose, .env.example, .gitignore.
-2. "Is it free?" engine + REST API: `GET /api/buildings`,
+2. **"Is it free?" engine + REST API** — DONE (see `docs/stage-2.md`). Calendar dates live in
+   `backend/src/main/resources/calendar/academic-calendar.csv` (re-check yearly vs Registrar). `GET /api/buildings`,
    `GET /api/rooms/free?building=&at=&minMinutes=` (free until + minutes remaining),
    `GET /api/rooms/{id}/schedule?date=`. Edge cases: outside term, reading week, holidays,
    exam period (timetable doesn't apply — say so), early/late hours. Justify indexes.
