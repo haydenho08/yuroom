@@ -57,7 +57,11 @@ York students use. Sibling projects: LockIn (Python/FastAPI/React), Statblox (Ty
    (typescript-eslint peer range). Vitest runs with TZ=Pacific/Auckland on purpose. building picker or all; free rooms sorted by free duration
    ("Free until 2:30 · 1h 45m"); room detail with day schedule. Footer:
    "Student-built, not affiliated with York University." No York logo/official branding.
-4. Near me + crowd reports: hand-curated building coordinates, distance sort in the browser
+4. **Near me + crowd reports** — DONE (see `docs/stage-4.md`). Building coords in
+   `backend/src/main/resources/buildings/buildings.csv` (OSM, ODbL attribution). Reports table has NO
+   reporter columns; rate limits are in-memory with HMAC keys (rotating secret). Stage 5 TODO: configure
+   trusted X-Forwarded-For for the host's proxy before relying on client IPs.
+   Original spec: hand-curated building coordinates, distance sort in the browser
    (location never sent to/stored on server). Anonymous "actually occupied" reports,
    expire ~60 min, rate-limited, shown as a warning.
 5. Polish + launch: GitHub Actions CI (build, tests, lint); cheap/free hosting for
