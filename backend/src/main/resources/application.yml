@@ -39,6 +39,11 @@ yuroom:
       min-request-interval: 10s
       timeout: 30s
 
+  availability:
+    open: "07:00"     # we only claim rooms are free between these times
+    close: "23:00"
+    calendar: classpath:calendar/academic-calendar.csv
+
 management:
   endpoints:
     web:
