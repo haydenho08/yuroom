@@ -52,7 +52,9 @@ York students use. Sibling projects: LockIn (Python/FastAPI/React), Statblox (Ty
    `GET /api/rooms/free?building=&at=&minMinutes=` (free until + minutes remaining),
    `GET /api/rooms/{id}/schedule?date=`. Edge cases: outside term, reading week, holidays,
    exam period (timetable doesn't apply — say so), early/late hours. Justify indexes.
-3. Frontend (mobile-first): building picker or all; free rooms sorted by free duration
+3. **Frontend (mobile-first)** — DONE (see `docs/stage-3.md`). `frontend/`: `npm run dev` (proxies
+   /api to :8080), `npm test`, `npm run lint`, `npm run typecheck`. TypeScript pinned to 6.0.x
+   (typescript-eslint peer range). Vitest runs with TZ=Pacific/Auckland on purpose. building picker or all; free rooms sorted by free duration
    ("Free until 2:30 · 1h 45m"); room detail with day schedule. Footer:
    "Student-built, not affiliated with York University." No York logo/official branding.
 4. Near me + crowd reports: hand-curated building coordinates, distance sort in the browser
