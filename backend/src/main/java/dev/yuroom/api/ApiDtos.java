@@ -25,7 +25,18 @@ public final class ApiDtos {
         return HM.format(t);
     }
 
-    public record BuildingDto(String code, String name, String campus, long roomCount) {
+    /** latitude/longitude are null for buildings not yet in the curated directory. */
+    public record BuildingDto(String code, String name, String campus, Double latitude, Double longitude,
+                              long roomCount) {
+    }
+
+    /**
+     * Crowd reports in effect, or null when there are none.
+     *
+     * @param count      how many people reported the room occupied in the last hour
+     * @param lastReportedAt the most recent report
+     */
+    public record ReportsDto(long count, Instant lastReportedAt) {
     }
 
     public record HoursDto(String open, String close) {
@@ -41,7 +52,7 @@ public final class ApiDtos {
      * @param freeUntilReason NEXT_BOOKING (a class starts) or CLOSING (end of usual hours)
      */
     public record FreeRoomDto(long roomId, String building, String room, String freeUntil,
-                              String freeUntilReason, long minutesFree) {
+                              String freeUntilReason, long minutesFree, ReportsDto occupiedReports) {
     }
 
     /**
@@ -57,6 +68,7 @@ public final class ApiDtos {
 
     public record RoomScheduleResponse(long roomId, String building, String room, LocalDate date, String status,
                                        String notice, String term, String timetableDay, HoursDto hours,
-                                       List<RangeDto> booked, List<RangeDto> free, Instant dataUpdatedAt) {
+                                       List<RangeDto> booked, List<RangeDto> free, Instant dataUpdatedAt,
+                                       ReportsDto occupiedReports) {
     }
 }

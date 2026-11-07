@@ -6,6 +6,7 @@ import dev.yuroom.api.ApiDtos.FreeRoomDto;
 import dev.yuroom.api.ApiDtos.FreeRoomsResponse;
 import dev.yuroom.api.ApiDtos.HoursDto;
 import dev.yuroom.api.ApiDtos.RangeDto;
+import dev.yuroom.api.ApiDtos.ReportsDto;
 import dev.yuroom.api.ApiDtos.RoomScheduleResponse;
 import dev.yuroom.availability.AvailabilityService;
 import dev.yuroom.availability.AvailabilityService.FreeRoomsAnswer;
@@ -16,6 +17,7 @@ import dev.yuroom.availability.core.FreeTimeCalculator;
 import dev.yuroom.availability.core.RoomAvailability;
 import dev.yuroom.availability.core.RoomAvailability.DaySchedule;
 import dev.yuroom.availability.core.RoomAvailability.FreeRoomsResult;
+import dev.yuroom.reports.ReportService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
@@ -66,7 +68,8 @@ class RoomController {
         return new FreeRoomsResponse(when.toOffsetDateTime(), when.toLocalDate(), r.status().name(), r.notice(),
                 r.day().termCode(), timetableDay(r.day()), hours(), answer.dataUpdatedAt(),
                 r.rooms().stream().map(f -> new FreeRoomDto(f.room().id(), f.room().building(), f.room().number(),
-                        hm(f.until()), f.reason().name(), f.minutes())).toList());
+                        hm(f.until()), f.reason().name(), f.minutes(), reports(answer.reports().get(f.room().id()))))
+                        .toList());
     }
 
     /** One room's bookings and free gaps for a day (default: today). Never includes course details. */
@@ -81,7 +84,7 @@ class RoomController {
         return new RoomScheduleResponse(rd.room().getId(), rd.room().getBuilding().getCode(), rd.room().getNumber(),
                 day, s.status().name(), s.notice(), s.day().termCode(), timetableDay(s.day()), hours(),
                 s.booked().stream().map(RangeDto::of).toList(), s.free().stream().map(RangeDto::of).toList(),
-                rd.dataUpdatedAt());
+                rd.dataUpdatedAt(), rd.reports().map(RoomController::reports).orElse(null));
     }
 
     private ZonedDateTime parseAtOrNow(String at) {
@@ -93,6 +96,10 @@ class RoomController {
         } catch (IllegalArgumentException e) {
             throw new BadRequestException("at", e.getMessage());
         }
+    }
+
+    private static ReportsDto reports(ReportService.ActiveSummary summary) {
+        return summary == null ? null : new ReportsDto(summary.reports(), summary.latest());
     }
 
     private HoursDto hours() {

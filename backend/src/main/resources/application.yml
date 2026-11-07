@@ -44,6 +44,14 @@ yuroom:
     close: "23:00"
     calendar: classpath:calendar/academic-calendar.csv
 
+  reports:
+    ttl: 60m                # a report warns others for an hour
+    per-room-window: 30m    # one client, one room: once per 30 min
+    per-client-limit: 10    # one client: 10 reports per hour across all rooms
+    per-client-window: 1h
+    key-rotation: 24h       # rate-limit keys use a secret that is replaced daily
+  buildings: classpath:buildings/buildings.csv
+
 management:
   endpoints:
     web:

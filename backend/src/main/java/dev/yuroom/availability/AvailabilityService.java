@@ -1,6 +1,9 @@
 package dev.yuroom.availability;
 
 import dev.yuroom.availability.core.AcademicCalendar;
+import dev.yuroom.availability.core.CampusTime;
+import dev.yuroom.reports.ReportService;
+import java.util.Comparator;
 import dev.yuroom.availability.core.DayContext;
 import dev.yuroom.availability.core.RoomAvailability;
 import dev.yuroom.availability.core.RoomAvailability.DaySchedule;
@@ -37,11 +40,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class AvailabilityService {
 
-    /** Answer to a free-rooms question, plus the context the API reports. */
-    public record FreeRoomsAnswer(ZonedDateTime at, FreeRoomsResult result, Instant dataUpdatedAt) {
+    /**
+     * Answer to a free-rooms question, plus the context the API reports. Rooms with an active
+     * "occupied" report are kept but moved after unreported ones (reports warn, never hide).
+     */
+    public record FreeRoomsAnswer(ZonedDateTime at, FreeRoomsResult result, Instant dataUpdatedAt,
+                                  Map<Long, ReportService.ActiveSummary> reports) {
     }
 
-    public record RoomDay(Room room, LocalDate date, DaySchedule schedule, Instant dataUpdatedAt) {
+    /** {@code reports} is only filled when the schedule is for today (reports describe "now"). */
+    public record RoomDay(Room room, LocalDate date, DaySchedule schedule, Instant dataUpdatedAt,
+                          Optional<ReportService.ActiveSummary> reports) {
     }
 
     public record BuildingSummary(Building building, long rooms) {
@@ -54,10 +63,11 @@ public class AvailabilityService {
     private final RoomRepository rooms;
     private final MeetingRepository meetings;
     private final IngestionRunRepository runs;
+    private final ReportService reportService;
 
     public AvailabilityService(RoomAvailability availability, AcademicCalendar calendar, TermRepository terms,
                                BuildingRepository buildings, RoomRepository rooms, MeetingRepository meetings,
-                               IngestionRunRepository runs) {
+                               IngestionRunRepository runs, ReportService reportService) {
         this.availability = availability;
         this.calendar = calendar;
         this.terms = terms;
@@ -65,6 +75,7 @@ public class AvailabilityService {
         this.rooms = rooms;
         this.meetings = meetings;
         this.runs = runs;
+        this.reportService = reportService;
     }
 
     public List<BuildingSummary> buildings() {
@@ -95,7 +106,15 @@ public class AvailabilityService {
 
         FreeRoomsResult result = availability.freeRooms(date, at.toLocalTime(), day,
                 candidateRooms.stream().map(AvailabilityService::ref).toList(), bookings, minMinutes);
-        return new FreeRoomsAnswer(at, result, dataUpdatedAt());
+
+        Map<Long, ReportService.ActiveSummary> reports = result.rooms().isEmpty()
+                ? Map.of() : reportService.activeAt(at.toInstant());
+        // Stable sort: unreported rooms first, each group keeping the longest-free-first order.
+        List<RoomAvailability.FreeRoom> ranked = result.rooms().stream()
+                .sorted(Comparator.comparing((RoomAvailability.FreeRoom f) -> reports.containsKey(f.room().id())))
+                .toList();
+        FreeRoomsResult rankedResult = new FreeRoomsResult(result.status(), result.day(), result.notice(), ranked);
+        return new FreeRoomsAnswer(at, rankedResult, dataUpdatedAt(), reports);
     }
 
     public RoomDay roomSchedule(long roomId, LocalDate date) {
@@ -106,7 +125,10 @@ public class AvailabilityService {
                 ? meetings.findSlotsForRoom(roomId, day.effectiveDay(), date).stream()
                         .map(s -> new TimeRange(s.start(), s.end())).toList()
                 : List.of();
-        return new RoomDay(room, date, availability.daySchedule(date, day, booked), dataUpdatedAt());
+        Instant now = reportService.now();
+        Optional<ReportService.ActiveSummary> reports = date.equals(CampusTime.toCampus(now).toLocalDate())
+                ? reportService.activeFor(roomId, now) : Optional.empty();
+        return new RoomDay(room, date, availability.daySchedule(date, day, booked), dataUpdatedAt(), reports);
     }
 
     private List<TermSpan> termSpans() {
