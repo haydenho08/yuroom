@@ -29,3 +29,6 @@ Thumbs.db
 node_modules/
 dist/
 coverage/
+
+# Local Claude Code tooling (launch configs etc.)
+.claude/
