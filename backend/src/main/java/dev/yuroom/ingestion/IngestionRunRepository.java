@@ -8,6 +8,8 @@ public interface IngestionRunRepository extends JpaRepository<IngestionRun, Long
 
     Optional<IngestionRun> findFirstBySourceOrderByStartedAtDesc(String source);
 
+    Optional<IngestionRun> findFirstByStatusInOrderByStartedAtDesc(Collection<RunStatus> statuses);
+
     Optional<IngestionRun> findFirstBySourceAndStatusInOrderByStartedAtDesc(String source,
                                                                              Collection<RunStatus> statuses);
 }
