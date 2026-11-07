@@ -1,0 +1,20 @@
+# York University undergraduate Fall/Winter 2026-2027 sessional dates (facts, hand-copied).
+# Source: https://registrar.yorku.ca/enrol/dates/2026-2027/fall-winter  (checked 2026-11-07)
+# Re-check every year. A wrong row here means wrong answers to students.
+#
+# kind: CLOSED (university closed) | EXAMS (timetable doesn't apply) |
+#       NO_CLASSES (open, no classes) | MAKEUP_DAY (runs another weekday's timetable)
+# When rows overlap, CLOSED > EXAMS > NO_CLASSES > MAKEUP_DAY.
+kind,start_date,end_date,label,follows_day
+CLOSED,2026-09-07,2026-09-07,Labour Day,
+NO_CLASSES,2026-10-10,2026-10-16,Fall Reading Week,
+CLOSED,2026-10-12,2026-10-12,Thanksgiving Day,
+NO_CLASSES,2026-12-09,2026-12-09,Fall Study Day,
+EXAMS,2026-12-10,2026-12-23,Fall examinations,
+CLOSED,2026-12-24,2027-01-01,Winter break,
+NO_CLASSES,2027-02-13,2027-02-19,Winter Reading Week,
+CLOSED,2027-02-15,2027-02-15,Family Day,
+CLOSED,2027-03-26,2027-03-26,Good Friday,
+MAKEUP_DAY,2027-04-05,2027-04-05,Make-up day (Friday timetable),FRIDAY
+NO_CLASSES,2027-04-06,2027-04-06,Winter Study Day,
+EXAMS,2027-04-07,2027-04-24,Winter examinations,
