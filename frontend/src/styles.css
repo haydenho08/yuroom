@@ -233,6 +233,39 @@ a { color: inherit; }
   color: var(--accent);
 }
 
+/* ---------- near me + reports ---------- */
+.near { margin-left: auto; }
+.hint { margin: 0; font-size: 0.85rem; color: var(--muted); }
+.hint--warn { color: var(--warn-text); }
+
+.room__top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.room__distance { font-size: 0.85rem; color: var(--muted); white-space: nowrap; }
+.room--reported { border-color: var(--short); }
+.report { color: var(--warn-text); }
+.report--compact {
+  font-size: 0.88rem;
+  background: var(--warn-bg);
+  border-radius: 8px;
+  padding: 2px 8px;
+  justify-self: start;
+  margin-top: 4px;
+}
+
+.report-box {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  text-align: center;
+}
+.report-box p { margin: 0 0 10px; }
+.report-box[role='status'] { color: var(--free); font-weight: 600; }
+.report-box--error { color: var(--warn-text); background: var(--warn-bg); }
+.report-box__actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.button--ghost { background: transparent; color: var(--accent); border: 1px solid var(--border); }
+.button:disabled { opacity: 0.6; cursor: progress; }
+
 /* ---------- states ---------- */
 .state { text-align: center; padding: 32px 8px; color: var(--muted); }
 .state h1 { color: var(--text); margin-bottom: 12px; }

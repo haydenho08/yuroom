@@ -4,7 +4,10 @@ import { Chips } from '../components/Chips'
 import { RoomList } from '../components/RoomList'
 import { StatusNotice } from '../components/StatusNotice'
 import { campusNow, formatAgo, formatCampusDateTime, formatDuration } from '../format'
+import { formatDistance } from '../geo'
+import { nearestBuildingMetres, rankRooms } from '../ranking'
 import { useApi } from '../useApi'
+import { useLocation, type LocationState } from '../useLocation'
 
 const MIN_OPTIONS = [
   { value: '0', label: 'Any length' },
@@ -40,6 +43,10 @@ export function FreeRoomsPage() {
     { refreshMs: at ? undefined : 60_000 }, // "now" mode keeps itself current
   )
 
+  // "Near me" is component state, never URL state: a location must not end up in a shared link.
+  const location = useLocation()
+  const here = location.state.kind === 'ready' ? location.state.point : null
+
   const update = (key: string, value: string) => {
     const next = new URLSearchParams(params)
     if (value && value !== '0') next.set(key, value)
@@ -71,7 +78,16 @@ export function FreeRoomsPage() {
               onChange={(e) => update('at', e.target.value)}
             />
           )}
+          <button
+            type="button"
+            className="chip near"
+            aria-pressed={location.state.kind !== 'off'}
+            onClick={location.state.kind === 'off' ? location.start : location.stop}
+          >
+            Near me
+          </button>
         </div>
+        <LocationStatus state={location.state} buildings={buildings.data ?? []} />
       </section>
 
       {free.error && !data ? (
@@ -99,7 +115,7 @@ export function FreeRoomsPage() {
           </div>
           <StatusNotice status={data.status} notice={data.notice} />
           {data.rooms.length > 0 ? (
-            <RoomList rooms={data.rooms} date={data.date} />
+            <RoomList rooms={rankRooms(data.rooms, buildings.data ?? [], here)} date={data.date} />
           ) : (
             <EmptyState status={data.status} min={Number(min)} building={building} />
           )}
@@ -117,6 +133,31 @@ function EmptyState({ status, min, building }: { status: Status; min: number; bu
       {(min > 0 || building) && ' Try a shorter time or another building.'}
     </p>
   )
+}
+
+/** One line explaining where "near me" is at, including the privacy promise. */
+function LocationStatus({ state, buildings }: { state: LocationState; buildings: Building[] }) {
+  switch (state.kind) {
+    case 'off':
+      return null
+    case 'locating':
+      return <p className="hint" role="status">Finding you… Your location stays on this device.</p>
+    case 'denied':
+      return <p className="hint hint--warn" role="status">Location is blocked for this site, so rooms aren't sorted by distance.</p>
+    case 'unavailable':
+      return <p className="hint hint--warn" role="status">{state.message}</p>
+    case 'ready': {
+      const nearest = nearestBuildingMetres(buildings, state.point)
+      if (nearest !== null && nearest > 3000) {
+        return (
+          <p className="hint hint--warn" role="status">
+            You seem to be off campus (nearest building {formatDistance(nearest)} away).
+          </p>
+        )
+      }
+      return <p className="hint" role="status">Sorted by distance. Your location stays on this device.</p>
+    }
+  }
 }
 
 function SkeletonList() {

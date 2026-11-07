@@ -6,7 +6,15 @@ export interface Building {
   code: string
   name: string | null
   campus: string | null
+  latitude: number | null
+  longitude: number | null
   roomCount: number
+}
+
+/** Anonymous "this room is actually occupied" reports in effect right now. */
+export interface OccupiedReports {
+  count: number
+  lastReportedAt: string
 }
 
 export interface Hours {
@@ -21,6 +29,7 @@ export interface FreeRoom {
   freeUntil: string
   freeUntilReason: 'NEXT_BOOKING' | 'CLOSING'
   minutesFree: number
+  occupiedReports: OccupiedReports | null
 }
 
 export interface FreeRoomsResponse {
@@ -53,6 +62,7 @@ export interface RoomScheduleResponse {
   booked: Range[]
   free: Range[]
   dataUpdatedAt: string | null
+  occupiedReports: OccupiedReports | null
 }
 
 /** An HTTP error, carrying the RFC 9457 problem "detail" when the server sent one. */
@@ -67,7 +77,23 @@ export class ApiError extends Error {
 }
 
 export async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
-  const res = await fetch(path, { signal, headers: { Accept: 'application/json' } })
+  return send<T>(path, { signal, headers: { Accept: 'application/json' } })
+}
+
+export interface ReportCreated {
+  roomId: number
+  expiresAt: string
+  activeReports: number
+  lastReportedAt: string
+}
+
+/** POST an occupancy report. Deliberately sends no body: nothing about the reporter is needed. */
+export function postReport(roomId: number): Promise<ReportCreated> {
+  return send<ReportCreated>(`/api/rooms/${roomId}/reports`, { method: 'POST', headers: { Accept: 'application/json' } })
+}
+
+async function send<T>(path: string, init: RequestInit): Promise<T> {
+  const res = await fetch(path, init)
   if (!res.ok) {
     let detail = `Request failed (${res.status})`
     try {
