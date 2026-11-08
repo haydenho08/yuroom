@@ -3,6 +3,8 @@ package dev.yuroom.reports;
 import dev.yuroom.availability.NotFoundException;
 import dev.yuroom.timetable.Room;
 import dev.yuroom.timetable.RoomRepository;
+import dev.yuroom.usage.UsageEvent;
+import dev.yuroom.usage.UsageService;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -43,8 +45,11 @@ public class ReportService {
     private final ClientKeys clientKeys;
     private final RateLimiter perRoom;
     private final RateLimiter perClient;
+    private final UsageService usage;
 
-    public ReportService(OccupancyReportRepository reports, RoomRepository rooms, ReportProperties props, Clock clock) {
+    public ReportService(OccupancyReportRepository reports, RoomRepository rooms, ReportProperties props, Clock clock,
+                         UsageService usage) {
+        this.usage = usage;
         this.reports = reports;
         this.rooms = rooms;
         this.props = props;
@@ -70,6 +75,7 @@ public class ReportService {
 
         Instant now = clock.instant();
         OccupancyReport saved = reports.save(new OccupancyReport(room, now, now.plus(props.ttl())));
+        usage.recordServerEvent(UsageEvent.REPORT);
         return new SubmitResult.Accepted(roomId, saved.getExpiresAt(), activeFor(roomId, now).orElseThrow());
     }
 
