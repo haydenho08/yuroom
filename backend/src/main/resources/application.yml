@@ -21,8 +21,21 @@ spring:
           java_time_use_direct_jdbc: true
   flyway:
     enabled: true
+  web:
+    resources:
+      add-mappings: false   # static files (the React build) are served by SpaWebConfig only
+
+server:
+  port: ${PORT:8080}        # most hosts tell the app which port to listen on via PORT
+  shutdown: graceful
+  compression:
+    enabled: true
+    mime-types: application/json,application/problem+json,text/html,text/css,text/javascript,application/javascript
 
 yuroom:
+  # True while running on synthetic sample data: the UI then shows a "demo data" banner everywhere.
+  demo-data: ${DEMO_DATA:false}
+
   ingestion:
     enabled: ${INGESTION_ENABLED:true}
     source: ${INGESTION_SOURCE:FILE}

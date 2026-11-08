@@ -1,0 +1,28 @@
+# Production overrides, enabled with SPRING_PROFILES_ACTIVE=prod (the Docker image sets it).
+# Everything secret or host-specific comes from environment variables; nothing secret lives here.
+
+server:
+  # The app runs behind the host's HTTPS proxy, so request.getRemoteAddr() is the proxy, not the
+  # student. "native" turns on Tomcat's RemoteIpValve, which reads X-Forwarded-For / -Proto, but only
+  # believes them when the request arrives from a trusted proxy address (by default the private
+  # ranges 10/8, 172.16/12, 192.168/16, 100.64/10, 127/8, ...). It walks X-Forwarded-For from the
+  # right and stops at the first untrusted hop, so a client can't pick its own rate-limit key by
+  # sending a fake header. If the host's proxy uses public addresses, set
+  # SERVER_TOMCAT_REMOTEIP_INTERNAL_PROXIES to a regex matching exactly those.
+  forward-headers-strategy: native
+
+spring:
+  datasource:
+    hikari:
+      # Fewer connections than the default 10: small hosted Postgres plans cap connections.
+      maximum-pool-size: ${DB_POOL_SIZE:5}
+
+yuroom:
+  ingestion:
+    file:
+      path: ${INGESTION_FILE_PATH:/app/data/timetable.csv}
+
+logging:
+  level:
+    root: INFO
+    org.hibernate.SQL: WARN
