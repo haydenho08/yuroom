@@ -17,5 +17,21 @@ services:
       timeout: 3s
       retries: 10
 
+  # The production image against the local database: `docker compose --profile full up --build`.
+  # Day-to-day development doesn't need this (gradlew bootRun + npm run dev is faster).
+  app:
+    profiles: ["full"]
+    build: .
+    container_name: yuroom-app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-yuroom}:${POSTGRES_PASSWORD:-yuroom}@db:5432/${POSTGRES_DB:-yuroom}
+      DEMO_DATA: "true"
+    ports:
+      - "8080:8080"
+    mem_limit: 512m   # same as a small hosted instance, so memory problems show up here first
+
 volumes:
   yuroom-db-data:

@@ -1,0 +1,13 @@
+# Keep the build context small and never send secrets or real data to the Docker daemon.
+.git
+.github
+.claude
+.env
+**/node_modules
+**/dist
+**/build
+**/.gradle
+data/*
+!data/sample/
+docs
+*.md

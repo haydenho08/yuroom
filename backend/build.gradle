@@ -49,6 +49,11 @@ tasks.named('test') {
     }
 }
 
+// Only the runnable Boot jar; no second "-plain" jar to confuse packaging.
+tasks.named('jar') {
+    enabled = false
+}
+
 // Run the app from the backend/ folder so the default sample-data path (../data/...) resolves.
 tasks.named('bootRun') {
     workingDir = projectDir
