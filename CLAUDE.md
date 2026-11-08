@@ -40,6 +40,8 @@ York students use. Sibling projects: LockIn (Python/FastAPI/React), Statblox (Ty
 - `docker compose up -d --wait`, then in `backend/`: `gradlew test`, `gradlew bootRun`.
 - Tests run with `user.timezone=Pacific/Auckland` on purpose; never "fix" a test by changing that.
 - Killing a `gradlew bootRun` task can leave the java.exe holding port 8080; stop it by port.
+- Production image locally: `docker compose --profile full up -d --build --wait` (app on :8080, 512 MB limit,
+  same DB volume as dev). Stop it before `bootRun` (both use 8080).
 
 ## Stages
 0. **Check the data first** — DONE (see `docs/stage-0.md`). Outcome: do NOT scrape.
@@ -59,15 +61,19 @@ York students use. Sibling projects: LockIn (Python/FastAPI/React), Statblox (Ty
    "Student-built, not affiliated with York University." No York logo/official branding.
 4. **Near me + crowd reports** — DONE (see `docs/stage-4.md`). Building coords in
    `backend/src/main/resources/buildings/buildings.csv` (OSM, ODbL attribution). Reports table has NO
-   reporter columns; rate limits are in-memory with HMAC keys (rotating secret). Stage 5 TODO: configure
-   trusted X-Forwarded-For for the host's proxy before relying on client IPs.
+   reporter columns; rate limits are in-memory with HMAC keys (rotating secret). Trusted
+   X-Forwarded-For handling was added in Stage 5 (prod profile).
    Original spec: hand-curated building coordinates, distance sort in the browser
    (location never sent to/stored on server). Anonymous "actually occupied" reports,
    expire ~60 min, rate-limited, shown as a warning.
-5. Polish + launch: GitHub Actions CI (build, tests, lint); cheap/free hosting for
-   Spring Boot + Postgres; privacy-friendly analytics (no personal data, honest WAU);
-   resume README (Mermaid architecture diagram, screenshots, setup, disclaimer);
-   launch plan (r/yorku, course Discords, CSHub, GDG York).
+5. **Polish + launch** — DONE (see `docs/stage-5.md`, `docs/deploy.md`, `docs/launch-plan.md`).
+   One Docker image (React build served by Spring, `SpaWebConfig`); `prod` profile trusts X-Forwarded-For
+   via Tomcat RemoteIpValve (private-range proxies only); security headers filter (CSP etc.);
+   `postgres://` DATABASE_URL auto-translated; analytics = `usage_daily(day,event,count)` only, public at
+   `/stats`; `GET /api/info` demoData banner (image defaults DEMO_DATA=true). Demo timetable is generated:
+   `java scripts/GenerateDemoTimetable.java > data/sample/timetable-demo.csv`. CI in `.github/workflows/ci.yml`.
+   Recommended host: Heroku via GitHub Student Pack (Hayden must create accounts/deploy). NOT deployed,
+   no remote repo yet. Launch only after Registrar permission + real data.
 
 ## Data-source decisions (from Stage 0)
 - York Courses site (w2prod.sis.yorku.ca) is behind a Cloudflare bot challenge — even
