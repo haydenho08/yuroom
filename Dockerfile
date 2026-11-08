@@ -1,10 +1,10 @@
-﻿# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1
 # One image, one process: Spring Boot serves the API and the built React app from the same origin.
 # Build:  docker build -t yuroom .
 # Run:    see docker-compose.yml (profile "full") or docs/deploy.md
 
 # ---- 1. Frontend: type-check and build static files ----
-FROM node:22-alpine AS frontend
+FROM node:25-alpine AS frontend
 WORKDIR /src/frontend
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci --no-audit --no-fund
