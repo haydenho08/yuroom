@@ -119,3 +119,24 @@ export function freeRoomsPath(params: { building?: string; at?: string; minMinut
 export function schedulePath(roomId: string | number, date?: string): string {
   return `/api/rooms/${encodeURIComponent(String(roomId))}/schedule${date ? `?date=${date}` : ''}`
 }
+
+/** GET /api/info: facts about this deployment the UI must be upfront about. */
+export interface SiteInfo {
+  demoData: boolean
+}
+
+export interface UsageWeek {
+  weekStart: string
+  visits: number
+  weeklyVisitors: number
+  avgDailyVisitors: number
+  nearMeUses: number
+  reports: number
+  complete: boolean
+}
+
+export interface WeeklyUsageResponse {
+  timeZone: string
+  note: string
+  weeks: UsageWeek[]
+}

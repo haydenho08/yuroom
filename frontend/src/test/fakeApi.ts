@@ -53,8 +53,9 @@ export function fakeFetch(route: Route) {
   const mock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = new URL(String(input), 'http://localhost')
     const res = route(url, init) ?? { status: 404, body: { detail: `no fake for ${url.pathname}` } }
-    return new Response(JSON.stringify(res.body), {
-      status: res.status ?? 200,
+    const status = res.status ?? 200
+    return new Response(status === 204 ? null : JSON.stringify(res.body), {
+      status,
       headers: { 'Content-Type': 'application/json' },
     })
   })
@@ -62,8 +63,9 @@ export function fakeFetch(route: Route) {
   return mock
 }
 
+/** URLs a page requested, leaving out the app-wide /api/info call made on every page. */
 export function requestedUrls(mock: ReturnType<typeof fakeFetch>): string[] {
-  return mock.mock.calls.map(([input]) => String(input))
+  return mock.mock.calls.map(([input]) => String(input)).filter((url) => url !== '/api/info')
 }
 
 /** Every request as "METHOD url body", for asserting what left the browser. */

@@ -8,6 +8,7 @@ import { formatDistance } from '../geo'
 import { nearestBuildingMetres, rankRooms } from '../ranking'
 import { useApi } from '../useApi'
 import { useLocation, type LocationState } from '../useLocation'
+import { recordNearMe } from '../usage'
 
 const MIN_OPTIONS = [
   { value: '0', label: 'Any length' },
@@ -82,7 +83,14 @@ export function FreeRoomsPage() {
             type="button"
             className="chip near"
             aria-pressed={location.state.kind !== 'off'}
-            onClick={location.state.kind === 'off' ? location.start : location.stop}
+            onClick={() => {
+              if (location.state.kind === 'off') {
+                location.start()
+                recordNearMe() // just "near me was used", never where
+              } else {
+                location.stop()
+              }
+            }}
           >
             Near me
           </button>
