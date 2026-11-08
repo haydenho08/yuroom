@@ -1,4 +1,4 @@
-﻿# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1
 # One image, one process: Spring Boot serves the API and the built React app from the same origin.
 # Build:  docker build -t yuroom .
 # Run:    see docker-compose.yml (profile "full") or docs/deploy.md
@@ -12,7 +12,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # ---- 2. Backend: build the jar with the frontend inside it ----
-FROM eclipse-temurin:21-jdk AS backend
+FROM eclipse-temurin:25-jdk AS backend
 WORKDIR /src/backend
 # Dependencies first, so this layer is cached until build.gradle changes.
 COPY backend/gradlew backend/settings.gradle backend/build.gradle ./
@@ -25,7 +25,7 @@ RUN ./gradlew --no-daemon -q bootJar \
  && java -Djarmode=tools -jar build/libs/yuroom-*.jar extract --layers --launcher --destination build/extracted
 
 # ---- 3. Runtime: small JRE image, non-root user ----
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:24-jre-alpine
 RUN addgroup -S yuroom && adduser -S yuroom -G yuroom
 WORKDIR /app
 # Layered: dependencies change rarely, our code often, so redeploys only push the small top layer.
